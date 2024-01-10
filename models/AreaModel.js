@@ -11,4 +11,5 @@ const AreaModel = db.define('areas', {
     estatus: { type: DataTypes.BOOLEAN },
 });
 
+
 export default AreaModel;

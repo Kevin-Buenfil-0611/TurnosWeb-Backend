@@ -1,36 +1,42 @@
 //Importar el Modelo de Area
 import AreaModel from "../models/AreaModel.js";
+import UsuarioModel from "../models/UsuarioModel.js";
 
 //** Métodos para el CRUD **/
 
 //Mostrar todos los registros
-export const getAllAreas = async (req, res) => {
+export const getAllUsuarios = async (req, res) => {
     try {
-        const areas = await AreaModel.findAll({
-            where: { estatus: true }
+        const usuarios = await UsuarioModel.findAll({
+            where: { estatus: true },
+            include: {
+                model: AreaModel,
+                attributes: ["id", "nombre_area"]
+            }
+            , attributes: ["id", "nombre_usuario", "contraseña"]
         });
-        res.json(areas)
+        res.json(usuarios)
     } catch (error) {
         res.json({ message: error.message })
     }
 };
 
 //Mostrar un registro
-export const getArea = async (req, res) => {
+export const getUsuario = async (req, res) => {
     try {
-        const area = await AreaModel.findAll({
+        const usuario = await UsuarioModel.findAll({
             where: { id: req.params.id }
         })
-        res.json(area[0])
+        res.json(usuario[0])
     } catch (error) {
         res.json({ message: error.message })
     }
 }
 
 //Crear un registro
-export const createArea = async (req, res) => {
+export const createUsuario = async (req, res) => {
     try {
-        await AreaModel.create(req.body)
+        await UsuarioModel.create(req.body)
         res.json({
             "message": "Registro creado correctamete"
         })
@@ -40,9 +46,9 @@ export const createArea = async (req, res) => {
 }
 
 //Actualizar o modificar un registro
-export const updateArea = async (req, res) => {
+export const updateUsuario = async (req, res) => {
     try {
-        await AreaModel.update(req.body, {
+        await UsuarioModel.update(req.body, {
             where: { id: req.params.id }
         })
         res.json({
@@ -54,9 +60,9 @@ export const updateArea = async (req, res) => {
 }
 
 //Eliminar un registro
-export const deleteArea = async (req, res) => {
+export const deleteUsuario = async (req, res) => {
     try {
-        await AreaModel.destroy({
+        await UsuarioModel.destroy({
             where: {
                 id: req.params.id
             }
