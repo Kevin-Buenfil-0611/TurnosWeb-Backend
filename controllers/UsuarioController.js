@@ -5,6 +5,7 @@ import UsuarioModel from "../models/UsuarioModel.js";
 //** Métodos para el CRUD **/
 
 //Mostrar todos los registros
+//Modificar la respuesta para que esté como en AreaCajaController
 export const getAllUsuarios = async (req, res) => {
     try {
         const usuarios = await UsuarioModel.findAll({
@@ -15,7 +16,10 @@ export const getAllUsuarios = async (req, res) => {
             }
             , attributes: ["id", "nombre_usuario", "contraseña"]
         });
-        res.json(usuarios)
+        //Modificar aquí y los datos obtenerlos de arriba
+        res.json(
+            usuarios
+        )
     } catch (error) {
         res.json({ message: error.message })
     }

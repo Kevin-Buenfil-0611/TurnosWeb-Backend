@@ -1,5 +1,6 @@
 //Importar el Modelo de Area
 import AreaModel from "../models/AreaModel.js";
+import CajaModel from "../models/CajaModel.js";
 
 //** Métodos para el CRUD **/
 
@@ -7,7 +8,11 @@ import AreaModel from "../models/AreaModel.js";
 export const getAllAreas = async (req, res) => {
     try {
         const areas = await AreaModel.findAll({
-            where: { estatus: true }
+            where: { estatus: true },
+            include: {
+                model: CajaModel,
+                attributes: ["id", "nombre_caja"]
+            }
         });
         res.json(areas)
     } catch (error) {
@@ -18,10 +23,14 @@ export const getAllAreas = async (req, res) => {
 //Mostrar un registro
 export const getArea = async (req, res) => {
     try {
-        const area = await AreaModel.findAll({
-            where: { id: req.params.id }
+        const area = await AreaModel.findOne({
+            where: { id: req.params.id },
+            include: {
+                model: CajaModel,
+                attributes: ["id", "nombre_caja"]
+            }
         })
-        res.json(area[0])
+        res.json(area)
     } catch (error) {
         res.json({ message: error.message })
     }

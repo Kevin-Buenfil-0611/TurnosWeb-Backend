@@ -2,15 +2,16 @@
 import db from "../database/db.js";
 import { DataTypes } from "sequelize";
 
-const AreaModel = db.define('areas', {
+const CajaModel = db.define('cajas', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    nombre_area: { type: DataTypes.STRING },
-    estatus: { type: DataTypes.BOOLEAN }
+    nombre_caja: { type: DataTypes.STRING },
+    estatus: { type: DataTypes.BOOLEAN },
 });
 
 
-export default AreaModel;
+
+export default CajaModel;
