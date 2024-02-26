@@ -3,15 +3,23 @@ import express from "express";
 import cors from "cors";
 import db from "./database/db.js";
 //Exportar modelos de las tablas
-import UsuarioModel from "./models/UsuarioModel.js";
 import AreaModel from "./models/AreaModel.js";
 import CajaModel from "./models/CajaModel.js";
 import AreaCajaModel from "./models/AreaCajaModel.js";
+import UsuarioModel from "./models/UsuarioModel.js";
+import PermisoModel from "./models/PermisoModel.js";
+import PermisoUsuarioModel from "./models/PermisoUsuariosModel.js";
+import DatosPersoUsuarioModel from "./models/DatosPersoUsuarioModel.js";
 //Exportar rutas de los modelos
 import cajaRoutes from "./routes/routesCaja.js";
 import areaRoutes from "./routes/routesArea.js"
 import usuarioRoutes from "./routes/routesUsuario.js";
 import areacajaRoutes from "./routes/routesAreaCaja.js";
+import permisoRoutes from "./routes/routesPermiso.js";
+import permisousuarioRoutes from "./routes/routesPermisoUsuario.js";
+import datospersRoutes from "./routes/routesDatosPersUsuario.js";
+import loginRoutes from "./routes/routesLogin.js";
+
 
 const app = express();
 
@@ -21,6 +29,11 @@ app.use('/areas', areaRoutes);
 app.use('/usuarios', usuarioRoutes);
 app.use('/cajas', cajaRoutes);
 app.use('/areacaja', areacajaRoutes);
+app.use('/permisos', permisoRoutes);
+app.use('/permisousuario', permisousuarioRoutes);
+app.use('/datospers', datospersRoutes);
+app.use('/login', loginRoutes)
+
 
 //Crear relaciones entre tablas
 //Unión tabla Usuarios con tabla Areas
@@ -30,6 +43,14 @@ AreaModel.hasMany(UsuarioModel, { foreignKey: "fk_idarea" });
 //Unión tabla Caja con tabla Areas
 CajaModel.belongsToMany(AreaModel, { through: AreaCajaModel, foreignKey: "caja_id", otherKey: "area_id", sourceKey: 'id', targetKey: 'id' });
 AreaModel.belongsToMany(CajaModel, { through: AreaCajaModel, foreignKey: "area_id", otherKey: "caja_id", sourceKey: 'id', targetKey: 'id' });
+
+//Unión tabla Caja con tabla Areas
+PermisoModel.belongsToMany(UsuarioModel, { through: PermisoUsuarioModel, foreignKey: "permisos_id", otherKey: "usuario_id", sourceKey: 'id', targetKey: 'id' });
+UsuarioModel.belongsToMany(PermisoModel, { through: PermisoUsuarioModel, foreignKey: "usuario_id", otherKey: "permisos_id", sourceKey: 'id', targetKey: 'id' });
+
+//Union tabla usuario con tabla datos_personales_usuarios
+UsuarioModel.hasOne(DatosPersoUsuarioModel, { foreignKey: 'fk_idusuario', sourceKey: 'id' });
+DatosPersoUsuarioModel.belongsTo(UsuarioModel, { foreignKey: 'fk_idusuario', targetKey: 'id' });
 
 try {
     db.authenticate();
