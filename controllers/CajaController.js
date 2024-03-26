@@ -41,8 +41,8 @@ export const createCaja = async (req, res) => {
         //Primero se crea el registro en la tabla Cajas
         const Caja = await CajaModel.create(
             {
-                nombre_caja: req.body.nombre_Caja,
-                estatus: req.body.estatus
+                nombre_caja: req.body.nombre_Caja, estatus: req.body.estatus,
+                create_by: req.body.create_by, create_at: req.body.create_at
             }, { transaction: transaction })
 
         //Se guarda la lista de los ID Areas en una constante

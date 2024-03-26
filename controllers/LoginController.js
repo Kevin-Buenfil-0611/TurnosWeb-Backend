@@ -8,8 +8,6 @@ import db from "../database/db.js";
 //Validar que el usuario exista, validar que la contraseña sea correcta
 //Devuelve un json con el nombre del usuario, sus permisos, si tiene autorización y un mensaje de autorizado
 export const findUser = async (req, res) => {
-    console.log(req.body.usuario);
-
     const transaction = await db.transaction();
     try {
         //Busca el usuario en la base de datos
@@ -27,7 +25,8 @@ export const findUser = async (req, res) => {
             });
         }
         //Desencriptar la contraseña que manda el front y la que se recibe de la bd
-        // Crea un hash SHA256 de la contraseña proporcionada
+        // Crea un hash SHA256 de la contraseña proporcionada la librería tiene su método para comparar
+        // 2 contraseñas ecnriptadas
         // const hash = crypto.createHash('sha256');
         // hash.update(req.body.contraseña);
         // const hashedPassword = hash.digest('hex');
@@ -62,6 +61,7 @@ export const findUser = async (req, res) => {
         const NombrePermisos = ListaPermisos.map((permiso) => (
             permiso.permisos
         ))
+
         await transaction.commit();
 
         // Checar la encriptacion de la contraseña
@@ -69,6 +69,8 @@ export const findUser = async (req, res) => {
         res.json({
             message: "Usuario y contraseña Correcto",
             usuario: usuario.nombre_usuario,
+            usuario_id: usuario.id,
+            caja_id: usuario.fk_idcaja,
             permisos: NombrePermisos,
             autorizado: true
         })

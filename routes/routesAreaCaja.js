@@ -8,7 +8,7 @@ const areacajaRoutes = express.Router();
 
 //Rutas para el CRUD de Area
 areacajaRoutes.get('/', getAllAreaCaja);
-areacajaRoutes.get('/:id', getAreaCaja);
+areacajaRoutes.get('/:caja_id', getAreaCaja);
 areacajaRoutes.post('/', createAreaCaja);
 areacajaRoutes.put('/:id', hideAreaCaja);
 areacajaRoutes.put('/:id/:caja_id', updateAreaCaja);

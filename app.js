@@ -5,11 +5,13 @@ import db from "./database/db.js";
 //Exportar modelos de las tablas
 import AreaModel from "./models/AreaModel.js";
 import CajaModel from "./models/CajaModel.js";
+import TurnoModel from "./models/TurnoModel.js";
 import AreaCajaModel from "./models/AreaCajaModel.js";
 import UsuarioModel from "./models/UsuarioModel.js";
 import PermisoModel from "./models/PermisoModel.js";
 import PermisoUsuarioModel from "./models/PermisoUsuariosModel.js";
 import DatosPersoUsuarioModel from "./models/DatosPersoUsuarioModel.js";
+import CajaUsuarioModel from "./models/CajaUsuarioModel.js";
 //Exportar rutas de los modelos
 import cajaRoutes from "./routes/routesCaja.js";
 import areaRoutes from "./routes/routesArea.js"
@@ -19,8 +21,12 @@ import permisoRoutes from "./routes/routesPermiso.js";
 import permisousuarioRoutes from "./routes/routesPermisoUsuario.js";
 import datospersRoutes from "./routes/routesDatosPersUsuario.js";
 import loginRoutes from "./routes/routesLogin.js";
-
-
+import turnoRoutes from "./routes/routesTurno.js";
+import cajausuarioRoutes from "./routes/routesCajaUsuario.js";
+//Controlador del video
+import { subirVideo, eliminarVideo, obtenerListaVideos } from './controllers/VideoController.js';
+//Ruta donde se encuentran los videos
+const videosPath = 'C:/Users/Kevin/Desktop/Programa Turnos/turnos_backend/videos';
 const app = express();
 
 app.use(cors());
@@ -32,13 +38,19 @@ app.use('/areacaja', areacajaRoutes);
 app.use('/permisos', permisoRoutes);
 app.use('/permisousuario', permisousuarioRoutes);
 app.use('/datospers', datospersRoutes);
-app.use('/login', loginRoutes)
+app.use('/login', loginRoutes);
+app.use('/turnos', turnoRoutes);
+app.use('/cajausuario', cajausuarioRoutes);
 
+app.get('/obtenerlistavideos', obtenerListaVideos);
+app.post('/subirvideos', subirVideo);
+app.delete('/eliminarvideo', eliminarVideo);
+app.use('/videos', express.static(videosPath));
 
 //Crear relaciones entre tablas
-//Unión tabla Usuarios con tabla Areas
-UsuarioModel.belongsTo(AreaModel, { foreignKey: "fk_idarea" });
-AreaModel.hasMany(UsuarioModel, { foreignKey: "fk_idarea" });
+//Unión tabla Usuarios con tabla Cajas
+CajaModel.belongsToMany(UsuarioModel, { through: CajaUsuarioModel, foreignKey: "caja_id", otherKey: "usuario_id", sourceKey: 'id', targetKey: 'id' });
+UsuarioModel.belongsToMany(CajaModel, { through: CajaUsuarioModel, foreignKey: "usuario_id", otherKey: "caja_id", sourceKey: 'id', targetKey: 'id' });
 
 //Unión tabla Caja con tabla Areas
 CajaModel.belongsToMany(AreaModel, { through: AreaCajaModel, foreignKey: "caja_id", otherKey: "area_id", sourceKey: 'id', targetKey: 'id' });
@@ -51,6 +63,12 @@ UsuarioModel.belongsToMany(PermisoModel, { through: PermisoUsuarioModel, foreign
 //Union tabla usuario con tabla datos_personales_usuarios
 UsuarioModel.hasOne(DatosPersoUsuarioModel, { foreignKey: 'fk_idusuario', sourceKey: 'id' });
 DatosPersoUsuarioModel.belongsTo(UsuarioModel, { foreignKey: 'fk_idusuario', targetKey: 'id' });
+
+//Union tabla areas con tabla turnos
+AreaModel.hasOne(TurnoModel, { foreignKey: 'fk_idarea', sourceKey: 'id' });
+TurnoModel.belongsTo(AreaModel, { foreignKey: 'fk_idarea', targetKey: 'id' });
+CajaModel.hasOne(TurnoModel, { foreignKey: 'fk_idcaja', sourceKey: 'id' });
+TurnoModel.belongsTo(CajaModel, { foreignKey: 'fk_idcaja', targetKey: 'id' });
 
 try {
     db.authenticate();

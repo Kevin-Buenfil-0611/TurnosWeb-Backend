@@ -80,7 +80,6 @@ export const createPermisoUsuario = async (req, res) => {
 export const updatePermisoUsuario = async (req, res) => {
     const transaction = await db.transaction();
     try {
-        console.log(req.body)
         await PermisoUsuarioModel.destroy({
             where: {
                 usuarios_id: req.body.usuarios_id
@@ -107,7 +106,6 @@ export const updatePermisoUsuario = async (req, res) => {
         });
         //Ciclo para modificar cada registro de la tabla permisoUsuarios
         const InfoTotal = await Promise.all(permisoUsuarios.map(async function (registro) {
-
             //Información de la tabla Permisos
             const permisoNombre = await PermisoModel.findOne({
                 where: {
@@ -133,6 +131,12 @@ export const updatePermisoUsuario = async (req, res) => {
             }
 
         }))
+
+        await UsuarioModel.update({
+            update_by: req.body.update_by, update_at: req.body.update_at
+        }, {
+            where: { id: req.params.id }
+        })
         res.json(InfoTotal)
     } catch (error) {
         res.json({ message: error.message });

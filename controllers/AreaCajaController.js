@@ -55,12 +55,10 @@ export const getAreaCaja = async (req, res) => {
     try {
         //Información de la tabla AreaCajas
         const areaCaja = await AreaCajaModel.findAll({
-            where: { caja_id: req.params.id },
-            attributes: ["area_id"]
+            where: { caja_id: req.params.caja_id, estatus: true },
         })
 
         res.json(areaCaja)
-
     } catch (error) {
         res.json({ message: error.message })
     }
@@ -87,7 +85,8 @@ export const updateAreaCaja = async (req, res) => {
         await AreaCajaModel.destroy({
             where: {
                 caja_id: req.body.caja_id
-            },
+            }
+        }, {
             transaction: transaction
         });
 
@@ -117,7 +116,6 @@ export const updateAreaCaja = async (req, res) => {
 
         //Ciclo para mostrar registro de la tabla areasCajas
         const InfoTotal = await Promise.all(areasCajas.map(async function (registro) {
-
             //Información de la tabla Areas
             const areaNombre = await AreaModel.findOne({
                 where: {
@@ -142,6 +140,11 @@ export const updateAreaCaja = async (req, res) => {
                 nombre_caja: cajaNombre.nombre_caja
             }
         }))
+        await CajaModel.update({
+            update_by: req.body.update_by, update_at: req.body.update_at
+        }, {
+            where: { id: req.body.caja_id }
+        })
         //Información actualizada
         res.json(InfoTotal)
     } catch (error) {

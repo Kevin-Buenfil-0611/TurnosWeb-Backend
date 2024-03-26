@@ -9,7 +9,11 @@ const AreaModel = db.define('areas', {
         autoIncrement: true
     },
     nombre_area: { type: DataTypes.STRING },
-    estatus: { type: DataTypes.BOOLEAN }
+    estatus: { type: DataTypes.BOOLEAN },
+    create_by: { type: DataTypes.STRING },
+    create_at: { type: DataTypes.DATE },
+    update_by: { type: DataTypes.STRING },
+    update_at: { type: DataTypes.DATE }
 });
 
 

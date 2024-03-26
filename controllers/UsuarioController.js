@@ -1,5 +1,5 @@
 //Importar el Modelo de Area
-import AreaModel from "../models/AreaModel.js";
+import CajaModel from "../models/CajaModel.js";
 import PermisoUsuarioModel from "../models/PermisoUsuariosModel.js";
 import UsuarioModel from "../models/UsuarioModel.js";
 import DatosPersoUsuarioModel from "../models/DatosPersoUsuarioModel.js";
@@ -14,11 +14,7 @@ export const getAllUsuarios = async (req, res) => {
     try {
         const usuarios = await UsuarioModel.findAll({
             where: { estatus: true },
-            include: {
-                model: AreaModel,
-                attributes: ["id", "nombre_area"]
-            }
-            , attributes: ["id", "nombre_usuario", "contraseña"]
+            attributes: ["id", "nombre_usuario", "contraseña"]
         }, { transaction: transaction });
 
         const datosUsuarios = await Promise.all(usuarios.map(async function (usuario) {
@@ -34,7 +30,6 @@ export const getAllUsuarios = async (req, res) => {
                 id: usuario.id,
                 nombre_usuario: usuario.nombre_usuario,
                 contraseña: usuario.contraseña,
-                nombre_area: usuario.area.nombre_area,
                 nombres: datopersonal.nombres,
                 primer_apellido: datopersonal.primer_apellido,
                 segundo_apellido: datopersonal.segundo_apellido,
@@ -42,7 +37,6 @@ export const getAllUsuarios = async (req, res) => {
             }
         }))
 
-        console.log(datosUsuarios);
         await transaction.commit();
         //Modificar aquí y los datos obtenerlos de arriba
         res.json(
@@ -70,12 +64,12 @@ export const getUsuario = async (req, res) => {
 export const createUsuario = async (req, res) => {
     const transaction = await db.transaction();
     try {
-        console.log(req.body)
         const Usuario = await UsuarioModel.create({
             nombre_usuario: req.body.nombre_usuario,
             contraseña: req.body.contraseña,
             estatus: req.body.estatus,
-            fk_idarea: req.body.fk_idarea
+            create_by: req.body.create_by,
+            create_at: req.body.create_at
         }, { transaction: transaction });
 
         const Fk_idusuario = Usuario.id

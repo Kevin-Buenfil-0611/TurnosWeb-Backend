@@ -1,6 +1,5 @@
 import db from "../database/db.js";
 import { DataTypes } from "sequelize";
-import AreaModel from "./AreaModel.js";
 
 const UsuarioModel = db.define('usuarios', {
     id: {
@@ -11,13 +10,10 @@ const UsuarioModel = db.define('usuarios', {
     nombre_usuario: { type: DataTypes.STRING },
     contraseña: { type: DataTypes.STRING },
     estatus: { type: DataTypes.BOOLEAN },
-    fk_idarea: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: AreaModel,
-            key: AreaModel.id
-        }
-    }
+    create_by: { type: DataTypes.STRING },
+    create_at: { type: DataTypes.DATE },
+    update_by: { type: DataTypes.STRING },
+    update_at: { type: DataTypes.DATE }
 });
 
 export default UsuarioModel;

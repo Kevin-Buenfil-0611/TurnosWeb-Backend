@@ -1,5 +1,6 @@
 import DatosPersoUsuarioModel from "../models/DatosPersoUsuarioModel.js";
 import db from "../database/db.js";
+import UsuarioModel from "../models/UsuarioModel.js";
 
 //** Métodos para el CRUD **/
 
@@ -54,13 +55,24 @@ export const createDatoPers = async (req, res) => {
 
 //Actualizar o modificar un registro
 export const updateDatoPers = async (req, res) => {
-    //Se modifica los datos que brinde la funcion
+
+    //Modifica los datos del usuario y actualiza el update del usuario
     try {
-        await DatosPersoUsuarioModel.update(req.body, {
+        await DatosPersoUsuarioModel.update({
+            nombres: req.body.nombres, primer_apellido: req.body.primer_apellido,
+            segundo_apellido: req.body.segundo_apellido, telefono: req.body.telefono,
+            update_by: req.body.update_by, update_at: req.body.update_at
+        }, {
             where: { fk_idusuario: req.params.id }
         })
-        //Consulto nuevamente los datos y los devuelvo 
 
+        await UsuarioModel.update({
+            update_by: req.body.update_by, update_at: req.body.update_at
+        }, {
+            where: { id: req.params.id }
+        })
+
+        //Consulto nuevamente los datos y los devuelvo 
         const NuevosDatosPersoUsuario = await DatosPersoUsuarioModel.findAll({
             where: estatus = true,
             attributes: ["id", "nombres", "primer_apellido",
