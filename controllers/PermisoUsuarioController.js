@@ -3,7 +3,7 @@ import PermisoUsuarioModel from "../models/PermisoUsuariosModel.js";
 import UsuarioModel from "../models/UsuarioModel.js";
 import PermisoModel from "../models/PermisoModel.js";
 import db from "../database/db.js";
-
+import moment from "moment";
 //** Métodos para el CRUD **/
 
 //Mostrar todos los registros
@@ -38,7 +38,7 @@ export const getAllPermisoUsuario = async (req, res) => {
             return {
                 id: registro.id,
                 permiso_id: registro.permisos_id,
-                nombre_permiso: permisoNombre.nombre,
+                nombre_permiso: permisoNombre,
                 usuario_id: registro.usuarios_id,
                 nombre_usuario: usuarioNombre.nombre_usuario
             }
@@ -80,6 +80,7 @@ export const createPermisoUsuario = async (req, res) => {
 export const updatePermisoUsuario = async (req, res) => {
     const transaction = await db.transaction();
     try {
+
         await PermisoUsuarioModel.destroy({
             where: {
                 usuarios_id: req.body.usuarios_id
@@ -94,16 +95,17 @@ export const updatePermisoUsuario = async (req, res) => {
                     permisos_id: permisoID,
                     usuarios_id: req.body.usuarios_id,
                     estatus: true
-                }, { transaction: transaction }
+                }
             )
         }))
 
-        await transaction.commit();
         //Actualizo la información una vez creado los nuevos campos y devuelvo un json con la informacion nueva
         const permisoUsuarios = await PermisoUsuarioModel.findAll({
             where: { estatus: true },
-            attributes: ["id", "permisos_id", "usuarios_id"]
-        });
+            attributes: ["id", "permisos_id", "usuarios_id"],
+        }, { transaction: transaction });
+
+
         //Ciclo para modificar cada registro de la tabla permisoUsuarios
         const InfoTotal = await Promise.all(permisoUsuarios.map(async function (registro) {
             //Información de la tabla Permisos
@@ -114,6 +116,7 @@ export const updatePermisoUsuario = async (req, res) => {
                 },
                 attributes: ["nombre"]
             })
+            console.log("El nombre del permiso:" + permisoNombre.nombre)
             //Información de la tabla Usuarios
             const usuarioNombre = await UsuarioModel.findOne({
                 where: {
@@ -129,14 +132,28 @@ export const updatePermisoUsuario = async (req, res) => {
                 usuario_id: registro.usuarios_id,
                 nombre_usuario: usuarioNombre.nombre_usuario
             }
-
         }))
 
+        //Actualiza la información de quien modificó al usuario
         await UsuarioModel.update({
-            update_by: req.body.update_by, update_at: req.body.update_at
+            update_by: req.body.update_by, update_at: new Date().toISOString()
         }, {
             where: { id: req.params.id }
         })
+
+        // await db.query(
+        //     'update usuarios SET update_by = :update_by ,update_at = :update_at where id = :id',
+        //     {
+        //         replacements: {
+        //             update_by: req.body.update_by,
+        //             update_at: req.body.update_at, id: req.params.id
+        //         },
+        //         type: db.QueryTypes.SELECT,
+        //         transaction: transaction
+        //     }
+        // );
+
+
         res.json(InfoTotal)
     } catch (error) {
         res.json({ message: error.message });

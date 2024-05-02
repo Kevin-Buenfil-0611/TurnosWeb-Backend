@@ -7,6 +7,7 @@ import AreaModel from "./models/AreaModel.js";
 import CajaModel from "./models/CajaModel.js";
 import TurnoModel from "./models/TurnoModel.js";
 import AreaCajaModel from "./models/AreaCajaModel.js";
+import AreaUsuarioModel from "./models/AreaUsuarioModel.js";
 import UsuarioModel from "./models/UsuarioModel.js";
 import PermisoModel from "./models/PermisoModel.js";
 import PermisoUsuarioModel from "./models/PermisoUsuariosModel.js";
@@ -17,6 +18,7 @@ import cajaRoutes from "./routes/routesCaja.js";
 import areaRoutes from "./routes/routesArea.js"
 import usuarioRoutes from "./routes/routesUsuario.js";
 import areacajaRoutes from "./routes/routesAreaCaja.js";
+import areausuarioRoutes from "./routes/routesAreaUsuario.js";
 import permisoRoutes from "./routes/routesPermiso.js";
 import permisousuarioRoutes from "./routes/routesPermisoUsuario.js";
 import datospersRoutes from "./routes/routesDatosPersUsuario.js";
@@ -41,6 +43,7 @@ app.use('/datospers', datospersRoutes);
 app.use('/login', loginRoutes);
 app.use('/turnos', turnoRoutes);
 app.use('/cajausuario', cajausuarioRoutes);
+app.use('/areausuario', areausuarioRoutes);
 
 app.get('/obtenerlistavideos', obtenerListaVideos);
 app.post('/subirvideos', subirVideo);
@@ -55,6 +58,10 @@ UsuarioModel.belongsToMany(CajaModel, { through: CajaUsuarioModel, foreignKey: "
 //Unión tabla Caja con tabla Areas
 CajaModel.belongsToMany(AreaModel, { through: AreaCajaModel, foreignKey: "caja_id", otherKey: "area_id", sourceKey: 'id', targetKey: 'id' });
 AreaModel.belongsToMany(CajaModel, { through: AreaCajaModel, foreignKey: "area_id", otherKey: "caja_id", sourceKey: 'id', targetKey: 'id' });
+
+//Unión tabla Usuario con tabla Areas
+UsuarioModel.belongsToMany(AreaModel, { through: AreaUsuarioModel, foreignKey: "usuario_id", otherKey: "area_id", sourceKey: 'id', targetKey: 'id' });
+AreaModel.belongsToMany(UsuarioModel, { through: AreaUsuarioModel, foreignKey: "area_id", otherKey: "usuario_id", sourceKey: 'id', targetKey: 'id' });
 
 //Unión tabla Caja con tabla Areas
 PermisoModel.belongsToMany(UsuarioModel, { through: PermisoUsuarioModel, foreignKey: "permisos_id", otherKey: "usuario_id", sourceKey: 'id', targetKey: 'id' });

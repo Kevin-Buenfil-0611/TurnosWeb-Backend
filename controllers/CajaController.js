@@ -1,6 +1,7 @@
 //Importar el Modelo de Caja
 import CajaModel from "../models/CajaModel.js";
 import AreaCajaModel from "../models/AreaCajaModel.js";
+import CajaUsuarioModel from "../models/CajaUsuarioModel.js";
 import db from "../database/db.js";
 
 //** Métodos para el CRUD **/
@@ -42,7 +43,7 @@ export const createCaja = async (req, res) => {
         const Caja = await CajaModel.create(
             {
                 nombre_caja: req.body.nombre_Caja, estatus: req.body.estatus,
-                create_by: req.body.create_by, create_at: req.body.create_at
+                create_by: req.body.create_by
             }, { transaction: transaction })
 
         //Se guarda la lista de los ID Areas en una constante
@@ -77,16 +78,80 @@ export const createCaja = async (req, res) => {
     }
 }
 
-//Actualizar o modificar un registro
+//Actualizar o modificar las areas de la caja
 export const updateCaja = async (req, res) => {
+    const transaction = await db.transaction();
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
     try {
-        await CajaModel.update(req.body, {
+        //Primero se cambia el estatus a false  del registro de Caja
+        await CajaModel.update({
+            estatus: req.body.estatus,
+            update_by: req.body.update_by,
+            update_at: formatoFechaUpdate
+        }, {
             where: { id: req.params.id }
+        }, { transaction: transaction })
+
+        //Se buscan todos los registros que coincidan con la caja "eliminada"
+        const AreasConCaja = await AreaCajaModel.findAll({
+            where: { caja_id: req.params.id },
+            attributes: ["id"]
         })
+        const UsuarioConCaja = await CajaUsuarioModel.findAll({
+            where: { cajas_id: req.params.id },
+            attributes: ["id"]
+        })
+
+        //Si se encuentra un registro se cambia su estatus a false
+        if (AreasConCaja != null) {
+            await Promise.all(AreasConCaja.map(async function (registro) {
+                await AreaCajaModel.update({ estatus: req.body.estatus }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
+        if (UsuarioConCaja != null) {
+            await Promise.all(UsuarioConCaja.map(async function (registro) {
+                await CajaUsuarioModel.update({ estatus: req.body.estatus }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
+        await transaction.commit();
         res.json({
             "message": "Registro actualizado correctamete"
         })
     } catch (error) {
+        await transaction.rollback();
+        res.json({ message: error.message });
+    }
+}
+
+//Actualizar o modificar el nombre de la caja
+export const updateNombreCaja = async (req, res) => {
+    const transaction = await db.transaction();
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
+    try {
+        await CajaModel.update({
+            nombre_caja: req.body.nombre_caja,
+            update_by: req.body.update_by,
+            update_at: formatoFechaUpdate
+        }, {
+            where: { id: req.params.id }
+        }, { transaction: transaction })
+
+        await transaction.commit();
+        res.json({
+            "message": "Registro actualizado correctamete"
+        })
+    } catch (error) {
+        await transaction.rollback();
         res.json({ message: error.message })
     }
 }

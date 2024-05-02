@@ -1,5 +1,4 @@
 //Importar el Modelo de Area
-import CajaModel from "../models/CajaModel.js";
 import PermisoUsuarioModel from "../models/PermisoUsuariosModel.js";
 import UsuarioModel from "../models/UsuarioModel.js";
 import DatosPersoUsuarioModel from "../models/DatosPersoUsuarioModel.js";
@@ -14,7 +13,7 @@ export const getAllUsuarios = async (req, res) => {
     try {
         const usuarios = await UsuarioModel.findAll({
             where: { estatus: true },
-            attributes: ["id", "nombre_usuario", "contraseña"]
+            attributes: ["id", "nombre_usuario"]
         }, { transaction: transaction });
 
         const datosUsuarios = await Promise.all(usuarios.map(async function (usuario) {
@@ -38,7 +37,6 @@ export const getAllUsuarios = async (req, res) => {
         }))
 
         await transaction.commit();
-        //Modificar aquí y los datos obtenerlos de arriba
         res.json(
             datosUsuarios
         )
@@ -68,8 +66,7 @@ export const createUsuario = async (req, res) => {
             nombre_usuario: req.body.nombre_usuario,
             contraseña: req.body.contraseña,
             estatus: req.body.estatus,
-            create_by: req.body.create_by,
-            create_at: req.body.create_at
+            create_by: req.body.create_by
         }, { transaction: transaction });
 
         const Fk_idusuario = Usuario.id
@@ -82,7 +79,6 @@ export const createUsuario = async (req, res) => {
             estatus: req.body.estatus,
             fk_idusuario: Fk_idusuario
         }, { transaction: transaction });
-
 
         await transaction.commit();
         res.json({
@@ -97,14 +93,24 @@ export const createUsuario = async (req, res) => {
 //Actualizar o modificar un registro
 export const updateUsuario = async (req, res) => {
     //Se modifica el estatus a false en la tabla de Usuarios y en la de PermisoUsuarios
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
     try {
-        await UsuarioModel.update(req.body, {
+        await UsuarioModel.update({
+            estatus: req.body.estatus,
+            update_by: req.body.update_by,
+            update_at: formatoFechaUpdate
+        }, {
             where: { id: req.params.id }
         })
-        await PermisoUsuarioModel.update(req.body, {
+        await PermisoUsuarioModel.update({
+            estatus: req.body.estatus
+        }, {
             where: { usuarios_id: req.params.id }
         })
-        await DatosPersoUsuarioModel.update(req.body, {
+        await DatosPersoUsuarioModel.update({
+            estatus: req.body.estatus
+        }, {
             where: { fk_idusuario: req.params.id }
         })
         res.json({

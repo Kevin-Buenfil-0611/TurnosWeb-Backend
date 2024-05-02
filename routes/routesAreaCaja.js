@@ -11,7 +11,7 @@ areacajaRoutes.get('/', getAllAreaCaja);
 areacajaRoutes.get('/:caja_id', getAreaCaja);
 areacajaRoutes.post('/', createAreaCaja);
 areacajaRoutes.put('/:id', hideAreaCaja);
-areacajaRoutes.put('/:id/:caja_id', updateAreaCaja);
+areacajaRoutes.put('/mod/:caja_id', updateAreaCaja);
 areacajaRoutes.delete('/:id', deleteAreaCaja);
 
 export default areacajaRoutes;

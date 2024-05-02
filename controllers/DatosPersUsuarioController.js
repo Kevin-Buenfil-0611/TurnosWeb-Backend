@@ -55,13 +55,14 @@ export const createDatoPers = async (req, res) => {
 
 //Actualizar o modificar un registro
 export const updateDatoPers = async (req, res) => {
-
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
     //Modifica los datos del usuario y actualiza el update del usuario
     try {
         await DatosPersoUsuarioModel.update({
             nombres: req.body.nombres, primer_apellido: req.body.primer_apellido,
             segundo_apellido: req.body.segundo_apellido, telefono: req.body.telefono,
-            update_by: req.body.update_by, update_at: req.body.update_at
+            update_by: req.body.update_by, update_at: formatoFechaUpdate
         }, {
             where: { fk_idusuario: req.params.id }
         })

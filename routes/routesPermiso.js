@@ -1,5 +1,8 @@
 import express from 'express';
-import { createPermiso, deletePermiso, getAllPermisos, getPermiso, updatePermiso } from '../controllers/PermisoController.js';
+import {
+    createPermiso, deletePermiso, getAllPermisos,
+    getPermiso, updatePermiso, updateNombrePermiso
+} from '../controllers/PermisoController.js';
 
 const permisoRoutes = express.Router();
 
@@ -8,6 +11,7 @@ permisoRoutes.get('/', getAllPermisos);
 permisoRoutes.get('/:id', getPermiso);
 permisoRoutes.post('/', createPermiso);
 permisoRoutes.put('/:id', updatePermiso);
+permisoRoutes.put('/:id/updateNombre', updateNombrePermiso);
 permisoRoutes.delete('/:id', deletePermiso);
 
 export default permisoRoutes;

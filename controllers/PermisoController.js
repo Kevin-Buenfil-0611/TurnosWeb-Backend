@@ -1,5 +1,7 @@
 //Importar el Modelo de Permiso
 import PermisoModel from "../models/PermisoModel.js";
+import db from "../database/db.js";
+import PermisoUsuarioModel from "../models/PermisoUsuariosModel.js";
 
 //** Métodos para el CRUD **/
 
@@ -44,10 +46,56 @@ export const createPermiso = async (req, res) => {
 
 //Actualizar o modificar un registro
 export const updatePermiso = async (req, res) => {
+    const transaction = await db.transaction();
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
     try {
-        await PermisoModel.update(req.body, {
+        //Primero se cambia el estatus a false  del registro de permiso
+        await PermisoModel.update({
+            estatus: req.body.estatus,
+            update_by: req.body.update_by,
+            update_at: formatoFechaUpdate
+        }, {
+            where: { id: req.params.id }
+        }, { transaction: transaction })
+
+        //Se buscan todos los registros que coincidan con el permiso"eliminada"
+        const UsuarioConPermiso = await PermisoUsuarioModel.findAll({
+            where: { permisos_id: req.params.id },
+            attributes: ["id"]
+        })
+
+        //Si se encuentra un registro se cambia su estatus a false
+        if (UsuarioConPermiso != null) {
+            await Promise.all(UsuarioConPermiso.map(async function (registro) {
+                await PermisoUsuarioModel.update({ estatus: req.body.estatus }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
+        res.json({
+            "message": "Registro actualizado correctamete"
+        })
+    } catch (error) {
+        res.json({ message: error.message })
+    }
+}
+
+export const updateNombrePermiso = async (req, res) => {
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
+    try {
+        await PermisoModel.update({
+            nombre: req.body.nombre,
+            descripcion: req.body.descripcion,
+            update_by: req.body.update_by,
+            update_at: formatoFechaUpdate
+        }, {
             where: { id: req.params.id }
         })
+
         res.json({
             "message": "Registro actualizado correctamete"
         })

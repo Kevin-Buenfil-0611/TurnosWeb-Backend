@@ -1,5 +1,8 @@
 import express from 'express';
-import { createArea, deleteArea, getAllAreas, getArea, updateArea } from '../controllers/AreaController.js';
+import {
+    createArea, deleteArea, getAllAreas, updateNombreArea,
+    getArea, updateArea, areaUsuario
+} from '../controllers/AreaController.js';
 
 const areaRoutes = express.Router();
 
@@ -7,6 +10,8 @@ const areaRoutes = express.Router();
 areaRoutes.get('/', getAllAreas);
 areaRoutes.get('/:id', getArea);
 areaRoutes.post('/', createArea);
+areaRoutes.post('/areaUsuario', areaUsuario);
+areaRoutes.put('/updateNombre', updateNombreArea);
 areaRoutes.put('/:id', updateArea);
 areaRoutes.delete('/:id', deleteArea);
 

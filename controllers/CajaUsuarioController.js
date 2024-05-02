@@ -13,8 +13,7 @@ export const getAllCajaUsuario = async (req, res) => {
         const cajaUsuarios = await CajaUsuarioModel.findAll({
             where: { estatus: true },
             attributes: ["id", "usuarios_id", "cajas_id"]
-        }, { transaction: transaction });
-
+        }, { transaction: transaction })
         //Ciclo para modificar cada registro de la tabla cajaUsuarios
         const InfoTotal = await Promise.all(cajaUsuarios.map(async function (registro) {
             //Información de la tabla Permisos
@@ -33,7 +32,6 @@ export const getAllCajaUsuario = async (req, res) => {
                 },
                 attributes: ["nombre_usuario"]
             }, { transaction: transaction })
-
             //Construir el nuevo objeto con las propiedades que necesito
             return {
                 id: registro.id,
@@ -53,15 +51,33 @@ export const getAllCajaUsuario = async (req, res) => {
 
 //Mostrar todas las cajas por usuario en la tabla CajaUsuarios
 export const getCajaUsuario = async (req, res) => {
+    const transaction = await db.transaction();
     try {
         //Información de la tabla PermisoUsuarios
         const cajaUsuario = await CajaUsuarioModel.findAll({
             where: { usuarios_id: req.params.id },
             attributes: ["usuarios_id", "cajas_id"]
-        })
-        res.json(cajaUsuario)
+        }, { transaction: transaction })
+        const InfoTotal = await Promise.all(cajaUsuario.map(async function (registro) {
+            //Información de la tabla Permisos
+            const cajaNombre = await CajaModel.findOne({
+                where: {
+                    estatus: true,
+                    id: registro.cajas_id
+                },
+                attributes: ["nombre_caja"]
+            }, { transaction: transaction })
+
+            return {
+                caja_id: registro.cajas_id,
+                nombre_caja: cajaNombre.nombre_caja
+            }
+        }))
+        await transaction.commit();
+        res.json(InfoTotal)
 
     } catch (error) {
+        await transaction.rollback();
         res.json({ message: error.message })
     }
 }
@@ -81,25 +97,26 @@ export const createCajaUsuario = async (req, res) => {
 //Actualizar o modificar un registro
 export const updateCajaUsuario = async (req, res) => {
     const transaction = await db.transaction();
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
     try {
         await CajaUsuarioModel.destroy({
             where: {
-                usuarios_id: req.body.usuarios_id
+                usuarios_id: req.body.usuario_id
             }
         }, { transaction: transaction }
-        );
+        )
 
-        const ListaCajasId = req.body.cajasMod
+        const ListaCajasId = req.body.cajaMod
         await Promise.all(ListaCajasId.map(async function (cajaID) {
             await CajaUsuarioModel.create(
                 {
-                    caja_id: cajaID,
-                    usuario_id: req.body.usuarios_id,
+                    cajas_id: cajaID,
+                    usuarios_id: req.body.usuario_id,
                     estatus: true
                 }, { transaction: transaction }
             )
         }))
-
         await transaction.commit();
         //Actualizo la información una vez creado los nuevos campos y devuelvo un json con la informacion nueva
         const cajaUsuarios = await CajaUsuarioModel.findAll({
@@ -131,14 +148,13 @@ export const updateCajaUsuario = async (req, res) => {
                 usuario_id: registro.usuarios_id,
                 nombre_usuario: usuarioNombre.nombre_usuario
             }
-
         }))
-
         await UsuarioModel.update({
-            update_by: req.body.update_by, update_at: req.body.update_at
+            update_by: req.body.update_by, update_at: formatoFechaUpdate
         }, {
             where: { id: req.params.id }
         })
+
         res.json(InfoTotal)
     } catch (error) {
         res.json({ message: error.message });
