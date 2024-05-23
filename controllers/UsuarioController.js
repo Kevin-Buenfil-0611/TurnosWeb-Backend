@@ -3,6 +3,8 @@ import PermisoUsuarioModel from "../models/PermisoUsuariosModel.js";
 import UsuarioModel from "../models/UsuarioModel.js";
 import DatosPersoUsuarioModel from "../models/DatosPersoUsuarioModel.js";
 import db from "../database/db.js";
+import CajaUsuarioModel from "../models/CajaUsuarioModel.js";
+import AreaUsuarioModel from "../models/AreaUsuarioModel.js";
 
 //** Métodos para el CRUD **/
 
@@ -28,7 +30,6 @@ export const getAllUsuarios = async (req, res) => {
             return {
                 id: usuario.id,
                 nombre_usuario: usuario.nombre_usuario,
-                contraseña: usuario.contraseña,
                 nombres: datopersonal.nombres,
                 primer_apellido: datopersonal.primer_apellido,
                 segundo_apellido: datopersonal.segundo_apellido,
@@ -93,28 +94,99 @@ export const createUsuario = async (req, res) => {
 //Actualizar o modificar un registro
 export const updateUsuario = async (req, res) => {
     //Se modifica el estatus a false en la tabla de Usuarios y en la de PermisoUsuarios
+    const transaction = await db.transaction();
     let fechaUpdate = new Date();
     const formatoFechaUpdate = fechaUpdate.toISOString();
     try {
+        //Primero se cambia el estatus a false  del registro del usuario
         await UsuarioModel.update({
             estatus: req.body.estatus,
             update_by: req.body.update_by,
             update_at: formatoFechaUpdate
         }, {
             where: { id: req.params.id }
-        })
-        await PermisoUsuarioModel.update({
-            estatus: req.body.estatus
-        }, {
-            where: { usuarios_id: req.params.id }
-        })
-        await DatosPersoUsuarioModel.update({
-            estatus: req.body.estatus
-        }, {
-            where: { fk_idusuario: req.params.id }
-        })
+        }, { transaction: transaction })
+
+        //Se buscan todos los registros que coincidan con el usuario "eliminado"
+        const PermisosDelUsuario = await PermisoUsuarioModel.findAll({
+            where: { usuarios_id: req.params.id },
+            attributes: ["id"]
+        }, { transaction: transaction })
+
+        const DatosPersDelUsuario = await DatosPersoUsuarioModel.findAll({
+            where: { fk_idusuario: req.params.id },
+            attributes: ["id"]
+        }, { transaction: transaction })
+
+        const CajasDelUsuario = await CajaUsuarioModel.findAll({
+            where: { usuarios_id: req.params.id },
+            attributes: ["id"]
+        }, { transaction: transaction })
+
+        const AreasDelUsuario = await AreaUsuarioModel.findAll({
+            where: { usuario_id: req.params.id },
+            attributes: ["id"]
+        }, { transaction: transaction })
+
+        //Si se encuentra un registro se cambia su estatus a false
+        if (PermisosDelUsuario != null) {
+            await Promise.all(PermisosDelUsuario.map(async function (registro) {
+                await PermisoUsuarioModel.update({ estatus: req.body.estatus }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
+        if (DatosPersDelUsuario != null) {
+            await Promise.all(DatosPersDelUsuario.map(async function (registro) {
+                await DatosPersoUsuarioModel.update({ estatus: req.body.estatus }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
+        if (CajasDelUsuario != null) {
+            await Promise.all(CajasDelUsuario.map(async function (registro) {
+                await CajaUsuarioModel.update({ estatus: req.body.estatus }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
+        if (AreasDelUsuario != null) {
+            await Promise.all(AreasDelUsuario.map(async function (registro) {
+                await AreaUsuarioModel.update({ estatus: req.body.estatus }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
         res.json({
             "message": "Registro actualizado correctamete"
+        })
+    } catch (error) {
+        res.json({ message: error.message })
+    }
+}
+
+//Mostrar un registro
+export const updateContraseñaUsuario = async (req, res) => {
+    let fechaUpdate = new Date();
+    const formatoFechaUpdate = fechaUpdate.toISOString();
+    try {
+        await UsuarioModel.update({
+            contraseña: req.body.contraseña,
+            update_by: req.body.update_by,
+            update_at: formatoFechaUpdate
+        }, {
+            where: { id: req.params.id }
+        })
+        res.json({
+            contraseña: usuario.contraseña
         })
     } catch (error) {
         res.json({ message: error.message })

@@ -6,7 +6,7 @@ import {
 
 const permisousuarioRoutes = express.Router();
 
-//Rutas para el CRUD de Area
+//Rutas para el CRUD de PermisosUsuario
 permisousuarioRoutes.get('/', getAllPermisoUsuario);
 permisousuarioRoutes.get('/:id', getPermisoUsuario);
 permisousuarioRoutes.post('/', createPermisoUsuario);

@@ -6,7 +6,7 @@ import {
 
 const areausuarioRoutes = express.Router();
 
-//Rutas para el CRUD de Area
+//Rutas para el CRUD de AreaUsuario
 areausuarioRoutes.get('/', getAllAreaUsuario);
 areausuarioRoutes.get('/:usuario_id', getAreaUsuario);
 areausuarioRoutes.post('/', createAreaUsuario);

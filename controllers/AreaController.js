@@ -83,7 +83,7 @@ export const updateArea = async (req, res) => {
         //Primero se cambia el estatus a false  del registro de area
         await AreaModel.update({
             estatus: req.body.estatus,
-            updat_by: req.body.update_by,
+            update_by: req.body.update_by,
             update_at: formatoFechaUpdate
         }, {
             where: { id: req.params.id }
@@ -102,7 +102,9 @@ export const updateArea = async (req, res) => {
         //Si se encuentra un registro se cambia su estatus a false
         if (CajaConArea != null) {
             await Promise.all(CajaConArea.map(async function (registro) {
-                await AreaCajaModel.update({ estatus: req.body.estatus }, {
+                await AreaCajaModel.update({
+                    estatus: req.body.estatus
+                }, {
                     where: { id: registro.id }
                 })
                 return registro.id

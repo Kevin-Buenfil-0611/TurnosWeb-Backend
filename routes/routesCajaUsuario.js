@@ -6,7 +6,7 @@ import {
 
 const cajausuarioRoutes = express.Router();
 
-//Rutas para el CRUD de Area
+//Rutas para el CRUD de CajaUsuario
 cajausuarioRoutes.get('/', getAllCajaUsuario);
 cajausuarioRoutes.get('/:id', getCajaUsuario);
 cajausuarioRoutes.post('/', createCajaUsuario);

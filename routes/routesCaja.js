@@ -11,7 +11,7 @@ cajaRoutes.get('/', getAllCajas);
 cajaRoutes.get('/:id', getCaja);
 cajaRoutes.post('/', createCaja);
 cajaRoutes.put('/:id', updateCaja);
-cajaRoutes.put('/:id/updateNombreCaja', updateNombreCaja);
+cajaRoutes.post('/updateNombreCaja', updateNombreCaja);
 cajaRoutes.delete('/:id', deleteCaja);
 
 export default cajaRoutes;

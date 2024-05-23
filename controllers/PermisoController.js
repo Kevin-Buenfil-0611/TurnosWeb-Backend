@@ -34,12 +34,17 @@ export const getPermiso = async (req, res) => {
 
 //Crear un registro
 export const createPermiso = async (req, res) => {
+    const transaction = await db.transaction();
     try {
-        await PermisoModel.create(req.body)
+        await PermisoModel.create(req.body,
+            { transaction: transaction })
+
+        await transaction.commit();
         res.json({
             "message": "Registro creado correctamete"
         })
     } catch (error) {
+        await transaction.rollback();
         res.json({ message: error.message })
     }
 }
@@ -74,16 +79,18 @@ export const updatePermiso = async (req, res) => {
                 return registro.id
             }))
         }
-
+        await transaction.commit();
         res.json({
             "message": "Registro actualizado correctamete"
         })
     } catch (error) {
+        await transaction.rollback();
         res.json({ message: error.message })
     }
 }
 
 export const updateNombrePermiso = async (req, res) => {
+    const transaction = await db.transaction();
     let fechaUpdate = new Date();
     const formatoFechaUpdate = fechaUpdate.toISOString();
     try {
@@ -94,12 +101,14 @@ export const updateNombrePermiso = async (req, res) => {
             update_at: formatoFechaUpdate
         }, {
             where: { id: req.params.id }
-        })
+        }, { transaction: transaction })
 
+        await transaction.commit();
         res.json({
             "message": "Registro actualizado correctamete"
         })
     } catch (error) {
+        await transaction.rollback();
         res.json({ message: error.message })
     }
 }

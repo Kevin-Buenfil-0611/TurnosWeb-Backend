@@ -4,7 +4,7 @@ import { createDatoPers, deleteDatosPers, getAllDatosPers, getDatoPer, updateDat
 
 const datospersRoutes = express.Router();
 
-//Rutas para el CRUD de Area
+//Rutas para el CRUD de Datos del Usuario
 datospersRoutes.get('/', getAllDatosPers);
 datospersRoutes.get('/:id', getDatoPer);
 datospersRoutes.post('/', createDatoPers);

@@ -34,14 +34,13 @@ export const getAllAreaUsuario = async (req, res) => {
                 },
                 attributes: ["nombre_usuario"]
             })
-
             //Construir el nuevo objeto con las propiedades que necesito
             return {
                 id: registro.id,
                 area_id: registro.area_id,
                 nombre_area: areaNombre.nombre_area,
                 usuario_id: registro.usuario_id,
-                nombre_usuario: usuarioNombre.nombre_caja
+                nombre_usuario: usuarioNombre.nombre_usuario
             }
         }))
         res.json(InfoTotal)

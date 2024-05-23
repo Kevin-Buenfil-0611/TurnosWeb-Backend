@@ -2,6 +2,7 @@
 import CajaModel from "../models/CajaModel.js";
 import AreaCajaModel from "../models/AreaCajaModel.js";
 import CajaUsuarioModel from "../models/CajaUsuarioModel.js";
+import TurnoModel from "../models/TurnoModel.js";
 import db from "../database/db.js";
 
 //** Métodos para el CRUD **/
@@ -103,10 +104,20 @@ export const updateCaja = async (req, res) => {
             attributes: ["id"]
         })
 
+        const TurnoAtendiendo = await TurnoModel.findAll({
+            where: {
+                fk_idcaja: req.params.id,
+                estatus: "Atendiendo"
+            },
+            attributes: ["id"]
+        })
+
         //Si se encuentra un registro se cambia su estatus a false
         if (AreasConCaja != null) {
             await Promise.all(AreasConCaja.map(async function (registro) {
-                await AreaCajaModel.update({ estatus: req.body.estatus }, {
+                await AreaCajaModel.update({
+                    estatus: req.body.estatus
+                }, {
                     where: { id: registro.id }
                 })
                 return registro.id
@@ -115,7 +126,22 @@ export const updateCaja = async (req, res) => {
 
         if (UsuarioConCaja != null) {
             await Promise.all(UsuarioConCaja.map(async function (registro) {
-                await CajaUsuarioModel.update({ estatus: req.body.estatus }, {
+                await CajaUsuarioModel.update({
+                    estatus: req.body.estatus
+                }, {
+                    where: { id: registro.id }
+                })
+                return registro.id
+            }))
+        }
+
+        if (TurnoAtendiendo != null) {
+            await Promise.all(TurnoAtendiendo.map(async function (registro) {
+                await TurnoModel.update({
+                    estatus: "Pendiente",
+                    update_by: req.body.update_by,
+                    update_at: formatoFechaUpdate
+                }, {
                     where: { id: registro.id }
                 })
                 return registro.id
@@ -143,7 +169,7 @@ export const updateNombreCaja = async (req, res) => {
             update_by: req.body.update_by,
             update_at: formatoFechaUpdate
         }, {
-            where: { id: req.params.id }
+            where: { id: req.body.caja_id }
         }, { transaction: transaction })
 
         await transaction.commit();

@@ -117,7 +117,7 @@ export const updateCajaUsuario = async (req, res) => {
                 }, { transaction: transaction }
             )
         }))
-        await transaction.commit();
+
         //Actualizo la información una vez creado los nuevos campos y devuelvo un json con la informacion nueva
         const cajaUsuarios = await CajaUsuarioModel.findAll({
             where: { estatus: true },
@@ -141,19 +141,24 @@ export const updateCajaUsuario = async (req, res) => {
                 },
                 attributes: ["nombre_usuario"]
             })
+
             return {
                 id: registro.id,
                 caja_id: registro.cajas_id,
-                nombre_permiso: cajaNombre.nombre,
+                nombre_caja: cajaNombre.nombre_caja,
                 usuario_id: registro.usuarios_id,
                 nombre_usuario: usuarioNombre.nombre_usuario
             }
         }))
+
+        await transaction.commit();
         await UsuarioModel.update({
-            update_by: req.body.update_by, update_at: formatoFechaUpdate
+            update_by: req.body.update_by,
+            update_at: formatoFechaUpdate
         }, {
-            where: { id: req.params.id }
+            where: { id: req.body.usuario_id }
         })
+
 
         res.json(InfoTotal)
     } catch (error) {

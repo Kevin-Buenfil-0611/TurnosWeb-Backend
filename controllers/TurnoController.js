@@ -2,6 +2,8 @@
 import AreaModel from "../models/AreaModel.js";
 import CajaModel from "../models/CajaModel.js"
 import TurnoModel from "../models/TurnoModel.js";
+import FolioModel from "../models/FolioModel.js";
+import db from "../database/db.js";
 
 //** Métodos para el CRUD **/
 
@@ -156,12 +158,43 @@ export const getTurnoSiguiente = async (req, res) => {
 
 //Crear un registro
 export const createTurno = async (req, res) => {
+    const transaction = await db.transaction();
     try {
-        await TurnoModel.create(req.body)
+        var NumeroFolio;
+        //Crea el turno
+        await TurnoModel.create(req.body,
+            { transaction: transaction })
+
+        //Crea el folio, primero verifica si hay un folio anterior y se le suma 1 su numero de folio
+        const ultimoFolioCreado = await FolioModel.findOne({
+            attributes: ["numero_folio"],
+            order: [['create_at', 'DESC']]
+        }, { transaction: transaction })
+
+        if (ultimoFolioCreado != null) {
+            NumeroFolio = ultimoFolioCreado.numero_folio + 1
+        } else {
+            NumeroFolio = 1
+        }
+
+        const ultimoTurnoCreado = await TurnoModel.findOne({
+            attributes: ["id"],
+            order: [['create_at', 'DESC']]
+        }, { transaction: transaction })
+
+        await FolioModel.create({
+            numero_folio: NumeroFolio,
+            estatus: true,
+            create_by: req.body.create_by,
+            fk_idturno: ultimoTurnoCreado.id
+        }, { transaction: transaction })
+
+        await transaction.commit();
         res.json({
             "message": "Registro creado correctamete"
         })
     } catch (error) {
+        await transaction.rollback();
         res.json({ message: error.message })
     }
 }
