@@ -42,13 +42,21 @@ export const getAllTurnosPendientes = async (req, res) => {
                 cajaNombre = nombreDeCaja.nombre_caja
             }
 
+            const FolioTurno = await FolioModel.findOne({
+                where: {
+                    fk_idturno: turno.id
+                },
+                attributes: ["numero_folio"]
+            })
+
             //Construir el nuevo objeto con las propiedades que necesito
             return {
                 id: turno.id,
                 nombre_area: areaNombre.nombre_area,
                 create_at: turno.create_at,
                 estatus: turno.estatus,
-                nombre_caja: cajaNombre
+                nombre_caja: cajaNombre,
+                folio: FolioTurno.numero_folio
             }
         }
 
@@ -88,12 +96,20 @@ export const getTurno = async (req, res) => {
                 attributes: ["nombre_area"]
             })
 
+            const FolioTurno = await FolioModel.findOne({
+                where: {
+                    fk_idturno: turno.id
+                },
+                attributes: ["numero_folio"]
+            })
+
             //Construir el nuevo objeto con las propiedades que necesito
             return {
                 id: turno.id,
                 nombre_area: areaNombre.nombre_area,
                 create_at: turno.create_at,
-                estatus: turno.estatus
+                estatus: turno.estatus,
+                folio: FolioTurno.numero_folio
             }
         }));
         res.json(TurnosPorAreaInfo)
@@ -145,11 +161,19 @@ export const getTurnoSiguiente = async (req, res) => {
             attributes: ["nombre_caja", "id"]
         })
 
+        const FolioTurno = await FolioModel.findOne({
+            where: {
+                fk_idturno: turnoAtendiendo.id
+            },
+            attributes: ["numero_folio"]
+        })
+
         res.json({
             id: turnoAtendiendo.id,
             nombre_area: areaNombre.nombre_area,
             nombre_caja: cajaNombre.nombre_caja,
-            caja_id: cajaNombre.id
+            caja_id: cajaNombre.id,
+            folio: FolioTurno.numero_folio
         });
     } catch (error) {
         res.json({ message: error.message });
@@ -161,41 +185,36 @@ export const createTurno = async (req, res) => {
     const transaction = await db.transaction();
     try {
         var NumeroFolio;
-        //Crea el turno
-        await TurnoModel.create(req.body,
-            { transaction: transaction })
+        // Crea el turno y obtiene el ID del nuevo turno
+        const nuevoTurno = await TurnoModel.create(req.body, { transaction: transaction });
 
-        //Crea el folio, primero verifica si hay un folio anterior y se le suma 1 su numero de folio
+        // Crea el folio, primero verifica si hay un folio anterior y se le suma 1 su numero de folio
         const ultimoFolioCreado = await FolioModel.findOne({
             attributes: ["numero_folio"],
             order: [['create_at', 'DESC']]
-        }, { transaction: transaction })
+        }, { transaction: transaction });
 
         if (ultimoFolioCreado != null) {
-            NumeroFolio = ultimoFolioCreado.numero_folio + 1
+            NumeroFolio = ultimoFolioCreado.numero_folio + 1;
         } else {
-            NumeroFolio = 1
+            NumeroFolio = 1;
         }
 
-        const ultimoTurnoCreado = await TurnoModel.findOne({
-            attributes: ["id"],
-            order: [['create_at', 'DESC']]
-        }, { transaction: transaction })
-
+        // Usa el ID del nuevo turno creado
         await FolioModel.create({
             numero_folio: NumeroFolio,
             estatus: true,
             create_by: req.body.create_by,
-            fk_idturno: ultimoTurnoCreado.id
-        }, { transaction: transaction })
+            fk_idturno: nuevoTurno.id
+        }, { transaction: transaction });
 
         await transaction.commit();
         res.json({
-            "message": "Registro creado correctamete"
-        })
+            "message": "Registro creado correctamente"
+        });
     } catch (error) {
         await transaction.rollback();
-        res.json({ message: error.message })
+        res.json({ message: error.message });
     }
 }
 

@@ -112,12 +112,10 @@ export const updateCaja = async (req, res) => {
             attributes: ["id"]
         })
 
-        //Si se encuentra un registro se cambia su estatus a false
+        //Si se encuentra un registro se elimina el registro
         if (AreasConCaja != null) {
             await Promise.all(AreasConCaja.map(async function (registro) {
-                await AreaCajaModel.update({
-                    estatus: req.body.estatus
-                }, {
+                await AreaCajaModel.destroy({
                     where: { id: registro.id }
                 })
                 return registro.id
@@ -126,9 +124,7 @@ export const updateCaja = async (req, res) => {
 
         if (UsuarioConCaja != null) {
             await Promise.all(UsuarioConCaja.map(async function (registro) {
-                await CajaUsuarioModel.update({
-                    estatus: req.body.estatus
-                }, {
+                await CajaUsuarioModel.destroy({
                     where: { id: registro.id }
                 })
                 return registro.id

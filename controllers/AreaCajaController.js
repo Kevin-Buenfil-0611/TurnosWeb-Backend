@@ -84,8 +84,8 @@ export const createAreaCaja = async (req, res) => {
 export const updateAreaCaja = async (req, res) => {
     const transaction = await db.transaction();
     const cajaId = req.body.caja_id
-
     let fechaUpdate = new Date();
+
     const formatoFechaUpdate = fechaUpdate.toISOString();
     try {
         //Aqui se elimine primero y luego se insertan los nuevos elementos

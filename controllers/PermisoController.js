@@ -70,10 +70,11 @@ export const updatePermiso = async (req, res) => {
             attributes: ["id"]
         })
 
+
         //Si se encuentra un registro se cambia su estatus a false
         if (UsuarioConPermiso != null) {
             await Promise.all(UsuarioConPermiso.map(async function (registro) {
-                await PermisoUsuarioModel.update({ estatus: req.body.estatus }, {
+                await PermisoUsuarioModel.destroy({
                     where: { id: registro.id }
                 })
                 return registro.id

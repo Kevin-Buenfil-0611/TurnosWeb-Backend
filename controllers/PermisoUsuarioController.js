@@ -3,7 +3,6 @@ import PermisoUsuarioModel from "../models/PermisoUsuariosModel.js";
 import UsuarioModel from "../models/UsuarioModel.js";
 import PermisoModel from "../models/PermisoModel.js";
 import db from "../database/db.js";
-import moment from "moment";
 //** Métodos para el CRUD **/
 
 //Mostrar todos los registros
@@ -116,7 +115,6 @@ export const updatePermisoUsuario = async (req, res) => {
                 },
                 attributes: ["nombre"]
             })
-            console.log("El nombre del permiso:" + permisoNombre.nombre)
             //Información de la tabla Usuarios
             const usuarioNombre = await UsuarioModel.findOne({
                 where: {
