@@ -120,6 +120,7 @@ export const getTurno = async (req, res) => {
 
 //Mostrar si hay un turno atendido
 export const getTurnoAtendiendo = async (req, res) => {
+
     try {
         const turnoAtendiendo = await TurnoModel.findOne({
             where: {
@@ -128,20 +129,40 @@ export const getTurnoAtendiendo = async (req, res) => {
             }
         })
 
-        res.json(turnoAtendiendo)
+        if (turnoAtendiendo != null) {
+            const FolioTurno = await FolioModel.findOne({
+                where: {
+                    fk_idturno: turnoAtendiendo.id
+                },
+                attributes: ["numero_folio"]
+            })
+
+            res.json({
+                id: turnoAtendiendo.id,
+                folio: FolioTurno.numero_folio,
+                fk_idarea: turnoAtendiendo.fk_idarea,
+                fk_idcaja: turnoAtendiendo.fk_idcaja
+            })
+        } else {
+            res.json(turnoAtendiendo)
+        }
+
+
     } catch (error) {
         res.json({ message: error.message })
+        await transaction.rollback();
     }
 }
 
 export const getTurnoSiguiente = async (req, res) => {
+    const transaction = await db.transaction();
     try {
         const turnoAtendiendo = await TurnoModel.findOne({
             where: {
                 estatus: ["Atendiendo", "Pendiente"]
             },
             order: [['update_at', 'DESC']] // Ordenar por update_at en orden descendente
-        });
+        }, { transaction: transaction });
 
         //Información de la tabla Areas
         const areaNombre = await AreaModel.findOne({
@@ -150,7 +171,7 @@ export const getTurnoSiguiente = async (req, res) => {
                 id: turnoAtendiendo.fk_idarea
             },
             attributes: ["nombre_area"]
-        })
+        }, { transaction: transaction })
 
         //Información de la tabla Caja
         const cajaNombre = await CajaModel.findOne({
@@ -159,14 +180,14 @@ export const getTurnoSiguiente = async (req, res) => {
                 id: turnoAtendiendo.fk_idcaja
             },
             attributes: ["nombre_caja", "id"]
-        })
+        }, { transaction: transaction })
 
         const FolioTurno = await FolioModel.findOne({
             where: {
                 fk_idturno: turnoAtendiendo.id
             },
             attributes: ["numero_folio"]
-        })
+        }, { transaction: transaction })
 
         res.json({
             id: turnoAtendiendo.id,
@@ -175,8 +196,10 @@ export const getTurnoSiguiente = async (req, res) => {
             caja_id: cajaNombre.id,
             folio: FolioTurno.numero_folio
         });
+        await transaction.commit();
     } catch (error) {
         res.json({ message: error.message });
+        await transaction.rollback();
     }
 };
 
