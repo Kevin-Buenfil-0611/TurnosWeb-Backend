@@ -26,6 +26,7 @@ import loginRoutes from "./routes/routesLogin.js";
 import turnoRoutes from "./routes/routesTurno.js";
 import cajausuarioRoutes from "./routes/routesCajaUsuario.js";
 import configRoutes from "./routes/routesConfig.js";
+import ticketRoutes from "./routes/routesTicket.js";
 //Controlador del video
 import { subirVideo, eliminarVideo, obtenerListaVideos } from './controllers/VideoController.js';
 import FolioModel from "./models/FolioModel.js";
@@ -46,7 +47,8 @@ app.use('/login', loginRoutes);
 app.use('/turnos', turnoRoutes);
 app.use('/cajausuario', cajausuarioRoutes);
 app.use('/areausuario', areausuarioRoutes);
-app.use('/config', configRoutes)
+app.use('/config', configRoutes);
+app.use('/ticket', ticketRoutes);
 
 app.get('/obtenerlistavideos', obtenerListaVideos);
 app.post('/subirvideos', subirVideo);

@@ -211,6 +211,13 @@ export const createTurno = async (req, res) => {
         // Crea el turno y obtiene el ID del nuevo turno
         const nuevoTurno = await TurnoModel.create(req.body, { transaction: transaction });
 
+        const nombreArea = await AreaModel.findOne({
+            where: {
+                id: req.body.fk_idarea
+            },
+            attributes: ["nombre_area"]
+        })
+
         // Crea el folio, primero verifica si hay un folio anterior y se le suma 1 su numero de folio
         const ultimoFolioCreado = await FolioModel.findOne({
             attributes: ["numero_folio"],
@@ -233,7 +240,9 @@ export const createTurno = async (req, res) => {
 
         await transaction.commit();
         res.json({
-            "message": "Registro creado correctamente"
+            "message": "Registro creado correctamente",
+            folio: NumeroFolio,
+            area: nombreArea.nombre_area
         });
     } catch (error) {
         await transaction.rollback();
